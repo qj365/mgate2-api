@@ -7,6 +7,11 @@ exports.getAllLogs = catchAsync(async (req, res, next) => {
   const limit = req.query.limit || 50;
 
   const pool = await sql.connect(config);
+  const totals = await pool
+    .request()
+    .query(
+      `SELECT count(*) as totals from logrecord2, dlr_status where logrecord2.statusId = dlr_status.id`
+    );
   const logs = await pool
     .request()
     .query(
@@ -16,6 +21,7 @@ exports.getAllLogs = catchAsync(async (req, res, next) => {
     );
   res.status(200).json({
     status: 'success',
+    totals: totals.recordsets[0][0].totals,
     results: logs.recordsets[0].length,
     data: {
       logs: logs.recordsets[0],

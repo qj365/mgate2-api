@@ -9,7 +9,7 @@ exports.getAllConnectors = catchAsync(async (req, res, next) => {
     .query("SELECT * from coreconfig where entryKey like 'connector%'");
   res.status(200).json({
     status: 'success',
-    results: logs.recordsets[0].length,
+    results: connectors.recordsets[0].length,
     data: {
       connectors: connectors.recordsets[0],
     },

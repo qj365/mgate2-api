@@ -7,7 +7,12 @@ exports.getAllQueues = catchAsync(async (req, res, next) => {
   const limit = req.query.limit || 50;
 
   const pool = await sql.connect(config);
-  const queue = await pool
+  const totals = await pool
+    .request()
+    .query(
+      `SELECT count(*) as totals from queuerecord, dlr_status where queuerecord.recordState = dlr_status.id`
+    );
+  const queues = await pool
     .request()
     .query(
       `SELECT * from queuerecord, dlr_status where queuerecord.recordState = dlr_status.id  order by queuerecord.id offset (${
@@ -16,9 +21,10 @@ exports.getAllQueues = catchAsync(async (req, res, next) => {
     );
   res.status(200).json({
     status: 'success',
-    results: queue.recordsets[0].length,
+    totals: totals.recordsets[0][0].totals,
+    results: queues.recordsets[0].length,
     data: {
-      queue: queue.recordsets[0],
+      queue: queues.recordsets[0],
     },
   });
 });
